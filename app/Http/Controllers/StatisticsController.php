@@ -43,18 +43,25 @@ class StatisticsController extends Controller
             $where['Backupset'] =  $Backupset;
         }
         if (isset($hour)) {
-            $date_from = $date_from . ' ' . date("h:i:s", strtotime($hour . ':00:00'));
-            $date_to = $date_to . ' ' . date("h:i:s", strtotime($hour . ':00:00'));
+            $hour_from =  date("H:i:s", strtotime($hour . ':00:00'));
+            $hour_to =  date("H:i:s", strtotime($hour . ':59:00'));
         }
 
         $data = [];
         if (isset($date_from) || isset($hour)) {
-            if (!$hour) {
+            if ($date_from && !$hour) {
                 $data = Statistics::where($where)
                     ->whereDate('time_stamp', '>=', $date_from)
                     ->whereDate('time_stamp', '<=', $date_to)
                     ->get();
+            } else if ($hour &&  !$date_from) {
+                $data = Statistics::where($where)
+                    ->whereTime('time_stamp', '>=', $hour_from)
+                    ->whereTime('time_stamp', '<=', $hour_to)
+                    ->get();
             } else {
+                $date_from =  $date_from . ' ' . date("H:i:s", strtotime($hour . ':00:00'));
+                $date_to =  $date_to . ' ' . date("H:i:s", strtotime($hour . ':59:00'));
                 $data = Statistics::where($where)
                     ->where('time_stamp', '>=', $date_from)
                     ->where('time_stamp', '<=', $date_to)
